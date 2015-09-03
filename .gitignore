@@ -1,0 +1,8 @@
+# Created by https://www.gitignore.io/api/elixir
+
+### Elixir ###
+/_build
+/deps
+erl_crash.dump
+*.ez
+
