@@ -7,7 +7,7 @@ defmodule Temp do
   end
 
   def path(options \\ nil) do
-    case generate_name(options, "f-") do
+    case generate_name(options, "f") do
       {:ok, path, _} -> {:ok, path}
       err -> err
     end
@@ -39,7 +39,7 @@ defmodule Temp do
   end
 
   defp open_file(options, func) do
-    case generate_name(options, "f-") do
+    case generate_name(options, "f") do
       {:ok, path, options} ->
         unless options[:mode], do: options = Dict.put(options, :mode, [:read, :write])
         ret = if func do
@@ -63,7 +63,7 @@ defmodule Temp do
   end
 
   def mkdir(options \\ %{}) do
-    case generate_name(options, "d-") do
+    case generate_name(options, "d") do
       {:ok, path, _} ->
         case File.mkdir path do
           :ok -> {:ok, path}
@@ -77,7 +77,7 @@ defmodule Temp do
     case prefix(options) do
       {:ok, path} ->
         affixes = parse_affixes(options, default_prefix)
-        name = [path, [
+        name = Path.join(path, [
          affixes[:prefix],
          "-",
          timestamp,
@@ -86,7 +86,7 @@ defmodule Temp do
          "-",
          random_string,
          affixes[:suffix]
-        ] |> Enum.join] |> Path.join
+        ] |> Enum.join)
         {:ok, name, affixes}
       err -> err
     end
