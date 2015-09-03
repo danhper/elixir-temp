@@ -1,45 +1,111 @@
 defmodule Temp do
-  def path(affixes \\ %{}) do
-    generate_name(affixes, "")
+  def path!(options \\ nil) do
+    case path(options) do
+      {:ok, path} -> path
+      err -> err
+    end
   end
 
-  def mkdir(affixes \\ %{}) do
-    case prefix do
-      {:ok, path} ->
-        dir_path = Path.join(path, generate_name(affixes, "d-"))
-        case File.mkdir dir_path do
-          :ok -> dir_path
+  def path(options \\ nil) do
+    case generate_name(options, "f-") do
+      {:ok, path, _} -> {:ok, path}
+      err -> err
+    end
+  end
+
+  def open!(options \\ nil) do
+    case open(options) do
+      {:ok, res, path} -> {res, path}
+      {:error, err} -> raise Temp.Error, message: err
+    end
+  end
+
+  def open!(options, func) do
+    case open(options, func) do
+      {:ok, res} -> res
+      {:error, err} -> raise Temp.Error, message: err
+    end
+  end
+
+  def open(options \\ nil) do
+    open_file(options, nil)
+  end
+
+  def open(options, func) do
+    case open_file(options, func) do
+      {:ok, _, path} -> {:ok, path}
+      err -> err
+    end
+  end
+
+  defp open_file(options, func) do
+    case generate_name(options, "f-") do
+      {:ok, path, options} ->
+        unless options[:mode], do: options = Dict.put(options, :mode, [:read, :write])
+        ret = if func do
+          File.open(path, options[:mode], func)
+        else
+          File.open(path, options[:mode])
+        end
+        case ret do
+          {:ok, res} -> {:ok, res, path}
           err -> err
         end
       err -> err
     end
   end
 
-  defp prefix do
+  def mkdir!(options \\ %{}) do
+    case mkdir(options) do
+      {:ok, path} -> path
+      {:error, err} -> raise Temp.Error, message: err
+    end
+  end
+
+  def mkdir(options \\ %{}) do
+    case generate_name(options, "d-") do
+      {:ok, path, _} ->
+        case File.mkdir path do
+          :ok -> {:ok, path}
+          err -> err
+        end
+      err -> err
+    end
+  end
+
+  defp generate_name(options, default_prefix) do
+    case prefix(options) do
+      {:ok, path} ->
+        affixes = parse_affixes(options, default_prefix)
+        name = [path, [
+         affixes[:prefix],
+         "-",
+         timestamp,
+         "-",
+         :os.getpid,
+         "-",
+         random_string,
+         affixes[:suffix]
+        ] |> Enum.join] |> Path.join
+        {:ok, name, affixes}
+      err -> err
+    end
+  end
+
+  defp prefix(%{basedir: dir}), do: {:ok, dir}
+  defp prefix(_) do
     case System.tmp_dir do
       nil -> {:error, "no tmp_dir readable"}
       path -> {:ok, path}
     end
   end
 
-  defp generate_name(affixes, default_prefix) do
-    affixes = parse_affixes(affixes, default_prefix)
-    [affixes[:prefix],
-     "-",
-     timestamp,
-     "-",
-     :os.getpid,
-     "-",
-     random_string,
-     affixes[:suffix]
-    ] |> Enum.join
-  end
-
-  defp parse_affixes(affixes, _) when is_bitstring(affixes) do
-    %{prefix: affixes, suffix: ""}
-  end
+  defp parse_affixes(nil, default_prefix), do: %{prefix: default_prefix}
+  defp parse_affixes(affixes, _) when is_bitstring(affixes), do: %{prefix: affixes, suffix: ""}
   defp parse_affixes(affixes, default_prefix) when is_map(affixes) do
-    %{prefix: affixes[:prefix] || default_prefix, suffix: affixes[:suffix] || ""}
+    affixes
+    |> Dict.put(:prefix, affixes[:prefix] || default_prefix)
+    |> Dict.put(:suffix, affixes[:suffix] || "")
   end
   defp parse_affixes(_, default_prefix) do
     %{prefix: default_prefix, suffix: ""}
