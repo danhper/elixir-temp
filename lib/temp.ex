@@ -1,6 +1,17 @@
 defmodule Temp do
   @type options :: nil | Path.t | map
 
+  @doc """
+  Returns an agent `pid` used to track temporary files
+  """
+  @spec track :: Agent.on_start
+  def track do
+    Agent.start_link(fn -> HashSet.new end)
+  end
+
+  @doc """
+  Same as `track/1`, but raises an exception on failure. Otherwise, returns the tracker `pid`.
+  """
   @spec track! :: pid
   def track! do
     case track do
@@ -9,11 +20,9 @@ defmodule Temp do
     end
   end
 
-  @spec track :: Agent.on_start
-  def track do
-    Agent.start_link(fn -> HashSet.new end)
-  end
-
+  @doc """
+  Cleans up the temporary files tracked by the passed agent `pid`
+  """
   @spec cleanup(pid) :: :ok | {:error, any}
   def cleanup(tracker) do
     result = Agent.get tracker, fn paths ->
@@ -25,14 +34,11 @@ defmodule Temp do
     end
   end
 
-  @spec path!(options) :: Path.t
-  def path!(options \\ nil) do
-    case path(options) do
-      {:ok, path} -> path
-      err -> err
-    end
-  end
-
+  @doc """
+  Returns a `{:ok, path}` where `path` is a path that can be used freely in the
+  system temporary directory, or `{:error, reason}` if it fails to get the
+  system temporary directory.
+  """
   @spec path(options) :: {:ok, Path.t} | {:error, String.t}
   def path(options \\ nil) do
     case generate_name(options, "f") do
@@ -41,14 +47,26 @@ defmodule Temp do
     end
   end
 
-  @spec open!(options, pid | nil) :: {File.io_device, Path.t}
-  def open!(options \\ nil, func \\ nil) do
-    case open(options, func) do
-      {:ok, res, path} -> {res, path}
-      {:error, err} -> raise Temp.Error, message: err
+  @doc """
+  Same as `path/1`, but raises an exception on failure. Otherwise, returns a temporary path.
+  """
+  @spec path!(options) :: Path.t
+  def path!(options \\ nil) do
+    case path(options) do
+      {:ok, path} -> path
+      err -> err
     end
   end
 
+  @doc """
+  Returns `{:ok, fd, file_path}` if no callback is passed, or `{:ok, file_path}`
+  if callback is passed, where `fd` is the file descriptor of a temporary file
+  and `file_path` is the path of the temporary file.
+  When no callback is passed, the file descriptor should be closed.
+  A tracker agent pid (created by `track/1`) can be passed as a second argument
+  to keep track of the created file.
+  Returns `{:error, reason}` if a failure occurs.
+  """
   @spec open(options, nil | (File.io_device -> any), nil | pid) :: {:ok, File.io_device, Path.t} | {:error, any}
   def open(options \\ nil, func \\ nil, tracker \\ nil) do
     case generate_name(options, "f") do
@@ -69,16 +87,25 @@ defmodule Temp do
     end
   end
 
-  @spec mkdir!(options, nil | pid) :: Path.t
-  def mkdir!(options \\ %{}, tracker \\ nil) do
-    case mkdir(options) do
-      {:ok, path} ->
-        if tracker, do: register_path(tracker, path)
-        path
+  @doc """
+  Same as `open/1`, but raises an exception on failure.
+  """
+  @spec open!(options, pid | nil) :: {File.io_device, Path.t}
+  def open!(options \\ nil, func \\ nil) do
+    case open(options, func) do
+      {:ok, res, path} -> {res, path}
       {:error, err} -> raise Temp.Error, message: err
     end
   end
 
+
+  @doc """
+  Returns `{:ok, dir_path}` where `dir_path` is the path is the path of the
+  created temporary directory.
+  A tracker agent pid (created by `track/1`) can be passed as a second argument
+  to keep track of the created directory.
+  Returns `{:error, reason}` if a failure occurs.
+  """
   @spec mkdir(options, nil | pid) :: {:ok, Path.t} | {:error, any}
   def mkdir(options \\ %{}, tracker \\ nil) do
     case generate_name(options, "d") do
@@ -90,6 +117,20 @@ defmodule Temp do
           err -> err
         end
       err -> err
+    end
+  end
+
+  @doc """
+  Same as `mkdir/1`, but raises an exception on failure. Otherwise, returns
+  a temporary directory path.
+  """
+  @spec mkdir!(options, nil | pid) :: Path.t
+  def mkdir!(options \\ %{}, tracker \\ nil) do
+    case mkdir(options) do
+      {:ok, path} ->
+        if tracker, do: register_path(tracker, path)
+        path
+      {:error, err} -> raise Temp.Error, message: err
     end
   end
 

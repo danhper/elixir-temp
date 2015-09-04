@@ -5,6 +5,10 @@ defmodule Temp.Mixfile do
     [app: :temp,
      version: "0.1.0",
      elixir: "~> 1.0",
+     version: "0.1.0",
+     name: "temp",
+     source_url: "http://github.com/tuvistavie/elixir-temp",
+     homepage_url: "http://github.com/tuvistavie/elixir-temp",
      package: package,
      description: description,
      build_embedded: Mix.env == :prod,
@@ -17,7 +21,8 @@ defmodule Temp.Mixfile do
   end
 
   defp deps do
-    []
+    [{:earmark, "~> 0.1", only: :dev},
+      {:ex_doc, "~> 0.7", only: :dev}]
   end
 
   defp description do
