@@ -94,6 +94,7 @@ defmodule Temp do
          :os.getpid,
          "-",
          random_string,
+         "-",
          affixes[:suffix]
         ] |> Enum.join)
         {:ok, name, affixes}
