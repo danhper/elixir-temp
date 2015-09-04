@@ -1,4 +1,7 @@
 defmodule Temp do
+  @type options :: nil | Path.t | map
+
+  @spec track! :: pid
   def track! do
     case track do
       {:ok, tracker} -> tracker
@@ -6,10 +9,12 @@ defmodule Temp do
     end
   end
 
+  @spec track :: Agent.on_start
   def track do
     Agent.start_link(fn -> HashSet.new end)
   end
 
+  @spec cleanup(pid) :: :ok | {:error, any}
   def cleanup(tracker) do
     result = Agent.get tracker, fn paths ->
       Enum.each(paths, &File.rm_rf!(&1))
@@ -20,6 +25,7 @@ defmodule Temp do
     end
   end
 
+  @spec path!(options) :: Path.t
   def path!(options \\ nil) do
     case path(options) do
       {:ok, path} -> path
@@ -27,6 +33,7 @@ defmodule Temp do
     end
   end
 
+  @spec path(options) :: {:ok, Path.t} | {:error, String.t}
   def path(options \\ nil) do
     case generate_name(options, "f") do
       {:ok, path, _} -> {:ok, path}
@@ -34,6 +41,7 @@ defmodule Temp do
     end
   end
 
+  @spec open!(options, pid | nil) :: {File.io_device, Path.t}
   def open!(options \\ nil, func \\ nil) do
     case open(options, func) do
       {:ok, res, path} -> {res, path}
@@ -41,6 +49,7 @@ defmodule Temp do
     end
   end
 
+  @spec open(options, nil | (File.io_device -> any), nil | pid) :: {:ok, File.io_device, Path.t} | {:error, any}
   def open(options \\ nil, func \\ nil, tracker \\ nil) do
     case generate_name(options, "f") do
       {:ok, path, options} ->
@@ -60,6 +69,7 @@ defmodule Temp do
     end
   end
 
+  @spec mkdir!(options, nil | pid) :: Path.t
   def mkdir!(options \\ %{}, tracker \\ nil) do
     case mkdir(options) do
       {:ok, path} ->
@@ -69,6 +79,7 @@ defmodule Temp do
     end
   end
 
+  @spec mkdir(options, nil | pid) :: {:ok, Path.t} | {:error, any}
   def mkdir(options \\ %{}, tracker \\ nil) do
     case generate_name(options, "d") do
       {:ok, path, _} ->
@@ -82,6 +93,7 @@ defmodule Temp do
     end
   end
 
+  @spec generate_name(options, Path.t) :: {:ok, Path.t, map} | {:error, String.t}
   defp generate_name(options, default_prefix) do
     case prefix(options) do
       {:ok, path} ->
@@ -102,6 +114,7 @@ defmodule Temp do
     end
   end
 
+  @spec prefix(nil | map) :: {:ok, Path.t} | {:error, String.t}
   defp prefix(%{basedir: dir}), do: {:ok, dir}
   defp prefix(_) do
     case System.tmp_dir do
@@ -110,6 +123,7 @@ defmodule Temp do
     end
   end
 
+  @spec parse_affixes(options, Path.t) :: map
   defp parse_affixes(nil, default_prefix), do: %{prefix: default_prefix}
   defp parse_affixes(affixes, _) when is_bitstring(affixes), do: %{prefix: affixes, suffix: ""}
   defp parse_affixes(affixes, default_prefix) when is_map(affixes) do
