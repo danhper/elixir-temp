@@ -5,7 +5,7 @@ The module is inspired by [node-temp](https://github.com/bruce/node-temp).
 
 ## Usage
 
-### Getting a path
+### Getting a temporary path
 
 ```elixir
 # just get a path
