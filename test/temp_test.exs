@@ -52,4 +52,17 @@ defmodule TempTest do
     {err, _} = Temp.mkdir %{basedir: "/"}
     assert err == :error
   end
+
+  test :track do
+    tracker = Temp.track!
+    {:ok, dir} = Temp.mkdir nil, tracker
+    assert File.exists?(dir)
+
+    {:ok, path} = Temp.open "bar", &IO.write(&1, "foobar"), tracker
+    assert File.exists?(path)
+
+    assert Temp.cleanup(tracker) == :ok
+    assert !File.exists?(dir)
+    assert !File.exists?(path)
+  end
 end

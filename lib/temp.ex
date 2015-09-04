@@ -1,4 +1,25 @@
 defmodule Temp do
+  def track! do
+    case track do
+      {:ok, tracker} -> tracker
+      err -> raise Temp.Error, message: err
+    end
+  end
+
+  def track do
+    Agent.start_link(fn -> HashSet.new end)
+  end
+
+  def cleanup(tracker) do
+    result = Agent.get tracker, fn paths ->
+      Enum.each(paths, &File.rm_rf!(&1))
+    end
+    case result do
+      {:ok, _} -> :ok
+      err -> err
+    end
+  end
+
   def path!(options \\ nil) do
     case path(options) do
       {:ok, path} -> path
@@ -13,60 +34,48 @@ defmodule Temp do
     end
   end
 
-  def open!(options \\ nil) do
-    case open(options) do
+  def open!(options \\ nil, func \\ nil) do
+    case open(options, func) do
       {:ok, res, path} -> {res, path}
       {:error, err} -> raise Temp.Error, message: err
     end
   end
 
-  def open!(options, func) do
-    case open(options, func) do
-      {:ok, res} -> res
-      {:error, err} -> raise Temp.Error, message: err
-    end
-  end
-
-  def open(options \\ nil) do
-    open_file(options, nil)
-  end
-
-  def open(options, func) do
-    case open_file(options, func) do
-      {:ok, _, path} -> {:ok, path}
-      err -> err
-    end
-  end
-
-  defp open_file(options, func) do
+  def open(options \\ nil, func \\ nil, tracker \\ nil) do
     case generate_name(options, "f") do
       {:ok, path, options} ->
-        unless options[:mode], do: options = Dict.put(options, :mode, [:read, :write])
+        options = Dict.put(options, :mode, options[:mode] || [:read, :write])
         ret = if func do
           File.open(path, options[:mode], func)
         else
           File.open(path, options[:mode])
         end
         case ret do
-          {:ok, res} -> {:ok, res, path}
+          {:ok, res} ->
+            if tracker, do: register_path(tracker, path)
+            if func, do: {:ok, path}, else: {:ok, res, path}
           err -> err
         end
       err -> err
     end
   end
 
-  def mkdir!(options \\ %{}) do
+  def mkdir!(options \\ %{}, tracker \\ nil) do
     case mkdir(options) do
-      {:ok, path} -> path
+      {:ok, path} ->
+        if tracker, do: register_path(tracker, path)
+        path
       {:error, err} -> raise Temp.Error, message: err
     end
   end
 
-  def mkdir(options \\ %{}) do
+  def mkdir(options \\ %{}, tracker \\ nil) do
     case generate_name(options, "d") do
       {:ok, path, _} ->
         case File.mkdir path do
-          :ok -> {:ok, path}
+          :ok ->
+            if tracker, do: register_path(tracker, path)
+            {:ok, path}
           err -> err
         end
       err -> err
@@ -109,6 +118,10 @@ defmodule Temp do
   end
   defp parse_affixes(_, default_prefix) do
     %{prefix: default_prefix, suffix: ""}
+  end
+
+  defp register_path(tracker, path) do
+    Agent.update(tracker, &Set.put(&1, path))
   end
 
   defp timestamp do
