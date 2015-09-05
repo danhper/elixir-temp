@@ -59,7 +59,7 @@ IO.close fd
 File.rm file_path
 ```
 
-You can also path a function to `open` and use the file descriptor in it. In this case, the file will be closed automatically.
+You can also pass a function to `open` and use the file descriptor in it. In this case, the file will be closed automatically.
 
 ```elixir
 # tmp file
