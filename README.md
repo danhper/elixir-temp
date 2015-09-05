@@ -9,7 +9,7 @@ The module is inspired by [node-temp](https://github.com/bruce/node-temp).
 
 ```
   defp deps do
-    [{:temp, "~> 0.1.0"}]
+    [{:temp, "~> 0.1.1"}]
   end
 ```
 
