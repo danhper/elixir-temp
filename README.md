@@ -3,7 +3,7 @@
 An Elixir module to easily create and use temporary files and directories.
 The module is inspired by [node-temp](https://github.com/bruce/node-temp).
 
- ## Installation
+## Installation
 
  Add the dependency to your `mix.exs` deps:
 
