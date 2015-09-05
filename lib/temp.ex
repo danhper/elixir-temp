@@ -21,15 +21,29 @@ defmodule Temp do
   end
 
   @doc """
+  Return the paths currently tracked by the tracker agent.
+  """
+  @spec tracked(pid) :: Set.t
+  def tracked(tracker) do
+    Agent.get tracker, fn paths -> paths end
+  end
+
+
+  @doc """
   Cleans up the temporary files tracked by the passed agent `pid`
   """
   @spec cleanup(pid) :: :ok | {:error, any}
   def cleanup(tracker) do
     result = Agent.get tracker, fn paths ->
-      Enum.each(paths, &File.rm_rf!(&1))
+      Enum.reduce paths, {:ok, :tmp}, fn(path, acc) ->
+        case acc do
+          {:ok, _} -> File.rm_rf(path)
+          err -> err
+        end
+      end
     end
     case result do
-      {:ok, _} -> :ok
+      {:ok, _} -> Agent.update tracker, fn _ -> HashSet.new end
       err -> err
     end
   end

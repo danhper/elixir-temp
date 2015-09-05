@@ -61,8 +61,11 @@ defmodule TempTest do
     {:ok, path} = Temp.open "bar", &IO.write(&1, "foobar"), tracker
     assert File.exists?(path)
 
+    assert Set.size(Temp.tracked(tracker)) == 2
+
     assert Temp.cleanup(tracker) == :ok
     assert !File.exists?(dir)
     assert !File.exists?(path)
+    assert Set.size(Temp.tracked(tracker)) == 0
   end
 end
