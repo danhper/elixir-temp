@@ -80,7 +80,7 @@ You can also call `Temp.cleanup` if you want to clean them before the process ex
 Here is an example of how to use it.
 
 ```elixir
-tracker = Temp.track!
+Temp.track!
 
 dir_path = Temp.mkdir! "my-dir"
 File.write Path.join(dir_path, "file_in_my_dir"), "some content"
