@@ -185,6 +185,6 @@ defmodule Temp do
   end
 
   defp random_string do
-    Integer.to_string(:random.uniform(0x100000000), 36) |> String.downcase
+    Integer.to_string(:rand.uniform(0x100000000), 36) |> String.downcase
   end
 end
