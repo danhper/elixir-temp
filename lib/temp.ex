@@ -161,14 +161,14 @@ defmodule Temp do
 
   @spec parse_affixes(options, Path.t) :: map
   defp parse_affixes(nil, default_prefix), do: %{prefix: default_prefix}
-  defp parse_affixes(affixes, _) when is_bitstring(affixes), do: %{prefix: affixes, suffix: ""}
+  defp parse_affixes(affixes, _) when is_bitstring(affixes), do: %{prefix: affixes, suffix: nil}
   defp parse_affixes(affixes, default_prefix) when is_map(affixes) do
     affixes
     |> Dict.put(:prefix, affixes[:prefix] || default_prefix)
-    |> Dict.put(:suffix, affixes[:suffix] || "")
+    |> Dict.put(:suffix, affixes[:suffix] || nil)
   end
   defp parse_affixes(_, default_prefix) do
-    %{prefix: default_prefix, suffix: ""}
+    %{prefix: default_prefix, suffix: nil}
   end
 
   defp tracking? do

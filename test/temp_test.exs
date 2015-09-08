@@ -25,8 +25,10 @@ defmodule TempTest do
   end
 
   test :open do
-    {:ok, file, path} = Temp.open "foo"
+    {:ok, file, path} = Temp.open
     assert File.exists?(path)
+    assert String.starts_with?(Path.basename(path), "f-")
+    assert !String.ends_with?(Path.basename(path), "-")
     IO.write file, "foobar"
     File.close(file)
     assert File.read!(path) == "foobar"
@@ -44,6 +46,8 @@ defmodule TempTest do
   test :mkdir do
     {:ok, dir} = Temp.mkdir
     assert File.exists?(dir)
+    assert String.starts_with?(Path.basename(dir), "d-")
+    assert !String.ends_with?(Path.basename(dir), "-")
     File.rmdir!(dir)
 
     dir = Temp.mkdir! "abc"
