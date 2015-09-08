@@ -4,6 +4,8 @@ defmodule TempTest do
   test :path do
     {:ok, path} = Temp.path
     assert File.exists?(Path.dirname(path))
+    assert String.starts_with?(Path.basename(path), "f-")
+    assert !String.ends_with?(Path.basename(path), "-")
 
     path = Temp.path!
     assert File.exists?(Path.dirname(path))

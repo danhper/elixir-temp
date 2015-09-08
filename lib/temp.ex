@@ -141,17 +141,10 @@ defmodule Temp do
     case prefix(options) do
       {:ok, path} ->
         affixes = parse_affixes(options, default_prefix)
-        name = Path.join(path, [
-         affixes[:prefix],
-         "-",
-         timestamp,
-         "-",
-         :os.getpid,
-         "-",
-         random_string,
-         "-",
-         affixes[:suffix]
-        ] |> Enum.join)
+        parts = [timestamp, "-", :os.getpid, "-", random_string]
+        if affixes[:prefix], do: parts = [affixes[:prefix], "-"] ++ parts
+        if affixes[:suffix], do: parts = parts ++ ["-", affixes[:suffix]]
+        name = Path.join(path, Enum.join(parts))
         {:ok, name, affixes}
       err -> err
     end
