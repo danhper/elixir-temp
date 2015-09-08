@@ -54,18 +54,24 @@ defmodule TempTest do
   end
 
   test :track do
-    tracker = Temp.track!
-    {:ok, dir} = Temp.mkdir nil, tracker
+    assert Temp.track! == :ok
+    {:ok, dir} = Temp.mkdir nil
     assert File.exists?(dir)
 
-    {:ok, path} = Temp.open "bar", &IO.write(&1, "foobar"), tracker
+    {:ok, path} = Temp.open "bar", &IO.write(&1, "foobar")
     assert File.exists?(path)
 
-    assert Set.size(Temp.tracked(tracker)) == 2
+    assert Enum.count(Temp.tracked) == 2
 
-    assert Temp.cleanup(tracker) == :ok
+    assert Enum.count(Temp.cleanup) == 2
     assert !File.exists?(dir)
     assert !File.exists?(path)
-    assert Set.size(Temp.tracked(tracker)) == 0
+    assert Enum.count(Temp.tracked) == 0
+
+    # check cleanup can be called multiple times safely
+    {:ok, dir} = Temp.mkdir nil
+    assert File.exists?(dir)
+    assert Enum.count(Temp.cleanup) == 1
+    assert !File.exists?(dir)
   end
 end

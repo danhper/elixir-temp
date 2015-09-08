@@ -9,7 +9,7 @@ The module is inspired by [node-temp](https://github.com/bruce/node-temp).
 
 ```
   defp deps do
-    [{:temp, "~> 0.1.1"}]
+    [{:temp, "~> 0.2.0"}]
   end
 ```
 
@@ -73,23 +73,26 @@ File.rm file_path
 ### Tracking temporary files
 
 By default, you have to cleanup the files by yourself, however, you can tell
-`Temp` to track the temporary files for you and use `Temp.cleanup` when you want to erase them all. Here is an example of how to use it.
+`Temp` to track the temporary files.
+You just need to call `Temp.track` (or the bang version `Temp.track!`) and you are done.
+Temporary files will be cleaned up automatically when the process exits.
+You can also call `Temp.cleanup` if you want to clean them before the process exits.
+Here is an example of how to use it.
 
 ```elixir
 tracker = Temp.track!
 
-dir_path = Temp.mkdir! "my-dir", tracker
+dir_path = Temp.mkdir! "my-dir"
 File.write Path.join(dir_path, "file_in_my_dir"), "some content"
 
-file_path = Temp.open! "my-file", &IO.write(&1, "some content"), tracker
+file_path = Temp.open! "my-file", &IO.write(&1, "some content")
 IO.puts file_path
 
-{file_path, fd} = Temp.open! "my-file", nil, tracker
-IO.puts file_path
-IO.write fd, "some content"
-IO.close fd
-
+IO.puts inspect(Temp.tracked)
 
 # cleanup
-Temp.cleanup tracker
+Temp.cleanup
+
+dir_path = Temp.mkdir
+# this will be cleaned up on exit
 ```

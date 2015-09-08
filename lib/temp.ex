@@ -2,50 +2,42 @@ defmodule Temp do
   @type options :: nil | Path.t | map
 
   @doc """
-  Returns an agent `pid` used to track temporary files
+  Returns `:ok` when the tracking server used to track temporary files started properly.
   """
   @spec track :: Agent.on_start
   def track do
-    Agent.start_link(fn -> HashSet.new end)
+    case GenServer.start_link(Temp.Tracker, nil, name: TempTracker) do
+      {:ok, _} -> :ok
+      err -> err
+    end
   end
 
   @doc """
-  Same as `track/1`, but raises an exception on failure. Otherwise, returns the tracker `pid`.
+  Same as `track/1`, but raises an exception on failure. Otherwise, returns `:ok`
   """
   @spec track! :: pid
   def track! do
     case track do
-      {:ok, tracker} -> tracker
+      :ok -> :ok
       err -> raise Temp.Error, message: err
     end
   end
 
   @doc """
-  Return the paths currently tracked by the tracker agent.
+  Return the paths currently tracked.
   """
-  @spec tracked(pid) :: Set.t
-  def tracked(tracker) do
-    Agent.get tracker, fn paths -> paths end
+  @spec tracked :: Set.t
+  def tracked do
+    GenServer.call(TempTracker, :tracked)
   end
 
 
   @doc """
-  Cleans up the temporary files tracked by the passed agent `pid`
+  Cleans up the temporary files tracked
   """
-  @spec cleanup(pid) :: :ok | {:error, any}
-  def cleanup(tracker) do
-    result = Agent.get tracker, fn paths ->
-      Enum.reduce paths, {:ok, :tmp}, fn(path, acc) ->
-        case acc do
-          {:ok, _} -> File.rm_rf(path)
-          err -> err
-        end
-      end
-    end
-    case result do
-      {:ok, _} -> Agent.update tracker, fn _ -> HashSet.new end
-      err -> err
-    end
+  @spec cleanup :: :ok | {:error, any}
+  def cleanup do
+    GenServer.call(TempTracker, :cleanup)
   end
 
   @doc """
@@ -77,12 +69,10 @@ defmodule Temp do
   if callback is passed, where `fd` is the file descriptor of a temporary file
   and `file_path` is the path of the temporary file.
   When no callback is passed, the file descriptor should be closed.
-  A tracker agent pid (created by `track/1`) can be passed as a second argument
-  to keep track of the created file.
   Returns `{:error, reason}` if a failure occurs.
   """
-  @spec open(options, nil | (File.io_device -> any), nil | pid) :: {:ok, File.io_device, Path.t} | {:error, any}
-  def open(options \\ nil, func \\ nil, tracker \\ nil) do
+  @spec open(options, nil | (File.io_device -> any)) :: {:ok, File.io_device, Path.t} | {:error, any}
+  def open(options \\ nil, func \\ nil) do
     case generate_name(options, "f") do
       {:ok, path, options} ->
         options = Dict.put(options, :mode, options[:mode] || [:read, :write])
@@ -93,7 +83,7 @@ defmodule Temp do
         end
         case ret do
           {:ok, res} ->
-            if tracker, do: register_path(tracker, path)
+            if tracking?, do: register_path(path)
             if func, do: {:ok, path}, else: {:ok, res, path}
           err -> err
         end
@@ -116,17 +106,15 @@ defmodule Temp do
   @doc """
   Returns `{:ok, dir_path}` where `dir_path` is the path is the path of the
   created temporary directory.
-  A tracker agent pid (created by `track/1`) can be passed as a second argument
-  to keep track of the created directory.
   Returns `{:error, reason}` if a failure occurs.
   """
-  @spec mkdir(options, nil | pid) :: {:ok, Path.t} | {:error, any}
-  def mkdir(options \\ %{}, tracker \\ nil) do
+  @spec mkdir(options) :: {:ok, Path.t} | {:error, any}
+  def mkdir(options \\ %{}) do
     case generate_name(options, "d") do
       {:ok, path, _} ->
         case File.mkdir path do
           :ok ->
-            if tracker, do: register_path(tracker, path)
+            if tracking?, do: register_path(path)
             {:ok, path}
           err -> err
         end
@@ -138,11 +126,11 @@ defmodule Temp do
   Same as `mkdir/1`, but raises an exception on failure. Otherwise, returns
   a temporary directory path.
   """
-  @spec mkdir!(options, nil | pid) :: Path.t
-  def mkdir!(options \\ %{}, tracker \\ nil) do
+  @spec mkdir!(options) :: Path.t
+  def mkdir!(options \\ %{}) do
     case mkdir(options) do
       {:ok, path} ->
-        if tracker, do: register_path(tracker, path)
+        if tracking?, do: register_path(path)
         path
       {:error, err} -> raise Temp.Error, message: err
     end
@@ -190,8 +178,12 @@ defmodule Temp do
     %{prefix: default_prefix, suffix: ""}
   end
 
-  defp register_path(tracker, path) do
-    Agent.update(tracker, &Set.put(&1, path))
+  defp tracking? do
+    Enum.any?(Process.registered, fn x -> x == TempTracker end)
+  end
+
+  defp register_path(path) do
+    GenServer.call(TempTracker, {:add, path})
   end
 
   defp timestamp do
