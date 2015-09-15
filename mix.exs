@@ -3,7 +3,7 @@ defmodule Temp.Mixfile do
 
   def project do
     [app: :temp,
-     version: "0.2.4",
+     version: "0.2.5",
      elixir: "~> 1.0",
      name: "temp",
      source_url: "http://github.com/tuvistavie/elixir-temp",

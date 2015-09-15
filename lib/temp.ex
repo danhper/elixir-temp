@@ -37,7 +37,7 @@ defmodule Temp do
   """
   @spec cleanup :: :ok | {:error, any}
   def cleanup do
-    GenServer.call(TempTracker, :cleanup)
+    GenServer.call(TempTracker, :cleanup, :infinity)
   end
 
   @doc """
