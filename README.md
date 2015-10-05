@@ -54,7 +54,7 @@ Note that you can use all the options available for `Temp.path` as the first arg
 {:ok, fd, file_path} = Temp.open "my-file"
 IO.puts file_path
 IO.write fd, "some content"
-IO.close fd
+File.close fd
 # remove when done
 File.rm file_path
 ```
