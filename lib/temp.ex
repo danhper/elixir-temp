@@ -4,11 +4,26 @@ defmodule Temp do
   @doc """
   Returns `:ok` when the tracking server used to track temporary files started properly.
   """
+
+  @pdict_key :"$__temp_tracker__"
+
   @spec track :: Agent.on_start
   def track do
-    case GenServer.start_link(Temp.Tracker, nil, name: TempTracker) do
-      {:ok, _} -> :ok
-      err -> err
+    case Process.get(@pdict_key) do
+      nil ->
+        start_tracker
+      _ ->
+        :ok
+    end
+  end
+
+  defp start_tracker do
+    case GenServer.start_link(Temp.Tracker, nil, []) do
+      {:ok, pid} ->
+        Process.put(@pdict_key, pid)
+        :ok
+      err ->
+        err
     end
   end
 
@@ -28,16 +43,16 @@ defmodule Temp do
   """
   @spec tracked :: Set.t
   def tracked do
-    GenServer.call(TempTracker, :tracked)
+    get_tracker! |> GenServer.call(:tracked)
   end
 
 
   @doc """
-  Cleans up the temporary files tracked
+  Cleans up the temporary files tracked.
   """
   @spec cleanup :: :ok | {:error, any}
-  def cleanup do
-    GenServer.call(TempTracker, :cleanup, :infinity)
+  def cleanup(timeout \\ :infinity) do
+    get_tracker! |> GenServer.call(:cleanup, timeout)
   end
 
   @doc """
@@ -83,7 +98,7 @@ defmodule Temp do
         end
         case ret do
           {:ok, res} ->
-            if tracking?, do: register_path(path)
+            if tracker = get_tracker, do: register_path(tracker, path)
             if func, do: {:ok, path}, else: {:ok, res, path}
           err -> err
         end
@@ -114,7 +129,7 @@ defmodule Temp do
       {:ok, path, _} ->
         case File.mkdir path do
           :ok ->
-            if tracking?, do: register_path(path)
+            if tracker = get_tracker, do: register_path(tracker, path)
             {:ok, path}
           err -> err
         end
@@ -130,7 +145,7 @@ defmodule Temp do
   def mkdir!(options \\ %{}) do
     case mkdir(options) do
       {:ok, path} ->
-        if tracking?, do: register_path(path)
+        if tracker = get_tracker, do: register_path(tracker, path)
         path
       {:error, err} -> raise Temp.Error, message: err
     end
@@ -171,12 +186,21 @@ defmodule Temp do
     %{prefix: default_prefix, suffix: nil}
   end
 
-  defp tracking? do
-    Enum.any?(Process.registered, fn x -> x == TempTracker end)
+  defp get_tracker do
+    Process.get(@pdict_key)
   end
 
-  defp register_path(path) do
-    GenServer.call(TempTracker, {:add, path})
+  defp get_tracker! do
+    case get_tracker do
+      nil ->
+        raise Temp.Error, message: "temp tracker not started"
+      pid ->
+        pid
+    end
+  end
+
+  defp register_path(tracker, path) do
+    GenServer.call(tracker, {:add, path})
   end
 
   defp timestamp do

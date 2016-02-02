@@ -1,9 +1,15 @@
 defmodule Temp.Tracker do
   use GenServer
 
+  if :application.get_key(:elixir, :vsn) |> elem(1) |> to_string() |> Version.match?("~> 1.1") do
+    defp set(), do: MapSet.new
+  else
+    defp set(), do: HashSet.new
+  end
+
   def init(_args) do
     Process.flag(:trap_exit, true)
-    {:ok, HashSet.new}
+    {:ok, set()}
   end
 
   def handle_call({:add, item}, _from, state) do
@@ -16,7 +22,7 @@ defmodule Temp.Tracker do
 
   def handle_call(:cleanup, _from, state) do
     {removed, failed} = cleanup(state)
-    {:reply, removed, Enum.into(failed, HashSet.new)}
+    {:reply, removed, Enum.into(failed, set())}
   end
 
   def terminate(_reason, state) do
