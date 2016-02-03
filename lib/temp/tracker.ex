@@ -3,8 +3,10 @@ defmodule Temp.Tracker do
 
   if :application.get_key(:elixir, :vsn) |> elem(1) |> to_string() |> Version.match?("~> 1.1") do
     defp set(), do: MapSet.new
+    defdelegate put(set, value), to: MapSet
   else
     defp set(), do: HashSet.new
+    defdelegate put(set, value), to: HashSet
   end
 
   def init(_args) do
@@ -13,7 +15,7 @@ defmodule Temp.Tracker do
   end
 
   def handle_call({:add, item}, _from, state) do
-    {:reply, item, HashSet.put(state, item)}
+    {:reply, item, put(state, item)}
   end
 
   def handle_call(:tracked, _from, state) do
