@@ -113,6 +113,7 @@ defmodule Temp do
   def open!(options \\ nil, func \\ nil) do
     case open(options, func) do
       {:ok, res, path} -> {res, path}
+      {:ok, path} -> path
       {:error, err} -> raise Temp.Error, message: err
     end
   end
