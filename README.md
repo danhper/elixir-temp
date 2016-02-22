@@ -5,12 +5,12 @@ The module is inspired by [node-temp](https://github.com/bruce/node-temp).
 
 ## Installation
 
- Add the dependency to your `mix.exs` deps:
+Add the dependency to your `mix.exs` deps:
 
-```
-  defp deps do
-    [{:temp, "~> 0.2"}]
-  end
+```elixir
+defp deps do
+  [{:temp, "~> 0.2"}]
+end
 ```
 
 ## Usage
