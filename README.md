@@ -9,7 +9,7 @@ Add the dependency to your `mix.exs` deps:
 
 ```elixir
 defp deps do
-  [{:temp, "~> 0.3"}]
+  [{:temp, "~> 0.4"}]
 end
 ```
 
@@ -95,4 +95,19 @@ Temp.cleanup
 
 dir_path = Temp.mkdir
 # this will be cleaned up on exit
+```
+
+#### Usage in tests
+
+It is useful to track your temporary files in tests to avoid leaving stuff behind.
+This can easily be acheived, but as `on_exit` runs in another process,
+you will have to explicitly pass the tracker pid.
+
+```
+setup do
+  {:ok, tracker} = Temp.track
+  on_exit fn ->
+    Temp.cleanup(tracker)
+  end
+end
 ```

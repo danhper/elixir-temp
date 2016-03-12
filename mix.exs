@@ -3,7 +3,7 @@ defmodule Temp.Mixfile do
 
   def project do
     [app: :temp,
-     version: "0.3.0",
+     version: "0.4.0",
      elixir: "~> 1.0",
      name: "temp",
      source_url: "http://github.com/tuvistavie/elixir-temp",
@@ -21,7 +21,7 @@ defmodule Temp.Mixfile do
 
   defp deps do
     [{:earmark, "~> 0.1", only: :dev},
-      {:ex_doc, "~> 0.7", only: :dev}]
+     {:ex_doc, "~> 0.7", only: :dev}]
   end
 
   defp description do

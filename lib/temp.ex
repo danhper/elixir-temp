@@ -12,8 +12,8 @@ defmodule Temp do
     case Process.get(@pdict_key) do
       nil ->
         start_tracker
-      _ ->
-        :ok
+      v ->
+        {:ok, v}
     end
   end
 
@@ -21,7 +21,7 @@ defmodule Temp do
     case GenServer.start_link(Temp.Tracker, nil, []) do
       {:ok, pid} ->
         Process.put(@pdict_key, pid)
-        :ok
+        {:ok, pid}
       err ->
         err
     end
@@ -33,8 +33,8 @@ defmodule Temp do
   @spec track! :: pid
   def track! do
     case track do
-      :ok -> :ok
-      err -> raise Temp.Error, message: err
+      {:ok, pid} -> pid
+      err        -> raise Temp.Error, message: err
     end
   end
 
@@ -42,17 +42,17 @@ defmodule Temp do
   Return the paths currently tracked.
   """
   @spec tracked :: Set.t
-  def tracked do
-    get_tracker! |> GenServer.call(:tracked)
+  def tracked(tracker \\ get_tracker!) do
+    GenServer.call(tracker, :tracked)
   end
 
 
   @doc """
   Cleans up the temporary files tracked.
   """
-  @spec cleanup :: :ok | {:error, any}
-  def cleanup(timeout \\ :infinity) do
-    get_tracker! |> GenServer.call(:cleanup, timeout)
+  @spec cleanup(pid, Keyword.t) :: :ok | {:error, any}
+  def cleanup(tracker \\ get_tracker!, opts \\ []) do
+    GenServer.call(tracker, :cleanup, opts[:timeout] || :infinity)
   end
 
   @doc """

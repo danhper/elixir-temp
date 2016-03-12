@@ -80,7 +80,7 @@ defmodule TempTest do
   end
 
   test :track do
-    assert Temp.track! == :ok
+    assert {:ok, tracker} = Temp.track
     {:ok, dir} = Temp.mkdir nil
     assert File.exists?(dir)
 
@@ -88,6 +88,12 @@ defmodule TempTest do
     assert File.exists?(path)
 
     assert Enum.count(Temp.tracked) == 2
+
+    parent = self
+    spawn_link fn ->
+      send parent, {:count, Temp.tracked(tracker) |> Enum.count}
+    end
+    assert_receive {:count, 2}
 
     assert Enum.count(Temp.cleanup) == 2
     assert !File.exists?(dir)
@@ -98,6 +104,13 @@ defmodule TempTest do
     {:ok, dir} = Temp.mkdir nil
     assert File.exists?(dir)
     assert Enum.count(Temp.cleanup) == 1
+    assert !File.exists?(dir)
+
+    {:ok, dir} = Temp.mkdir nil
+    spawn_link fn ->
+      send parent, {:cleaned, Temp.cleanup(tracker) |> Enum.count}
+    end
+    assert_receive {:cleaned, 1}
     assert !File.exists?(dir)
   end
 end
