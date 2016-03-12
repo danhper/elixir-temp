@@ -9,7 +9,7 @@ Add the dependency to your `mix.exs` deps:
 
 ```elixir
 defp deps do
-  [{:temp, "~> 0.2"}]
+  [{:temp, "~> 0.3"}]
 end
 ```
 
