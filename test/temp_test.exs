@@ -75,8 +75,11 @@ defmodule TempTest do
     assert String.starts_with?(Path.basename(dir), "abc")
     File.rmdir!(dir)
 
-    {err, _} = Temp.mkdir %{basedir: "/"}
-    assert err == :error
+    {osfamily, _} = :os.type
+    unless osfamily == :win32 do
+      {err, _} = Temp.mkdir %{basedir: "/"}
+      assert err == :error
+    end
   end
 
   test :track do
