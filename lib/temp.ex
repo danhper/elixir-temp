@@ -160,13 +160,13 @@ defmodule Temp do
         parts = [timestamp, "-", :os.getpid, "-", random_string]
         parts =
           if affixes[:prefix] do
-            parts = [affixes[:prefix], "-"] ++ parts
+            [affixes[:prefix], "-"] ++ parts
           else
             parts
           end
         parts =
           if affixes[:suffix] do
-            parts = parts ++ ["-", affixes[:suffix]]
+            parts ++ ["-", affixes[:suffix]]
           else
             parts
           end
