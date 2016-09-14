@@ -20,8 +20,8 @@ defmodule Temp.Mixfile do
   end
 
   defp deps do
-    [{:earmark, "~> 0.2", only: :dev},
-     {:ex_doc, "~> 0.7", only: :dev}]
+    [{:earmark, "~> 1.0", only: :dev},
+     {:ex_doc, "~> 0.13", only: :dev}]
   end
 
   defp description do
