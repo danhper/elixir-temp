@@ -170,6 +170,12 @@ defmodule Temp do
           else
             parts
           end
+        parts =
+          if affixes[:extension] do
+            parts ++ [".", affixes[:extension]]
+          else
+            parts
+          end
         name = Path.join(path, Enum.join(parts))
         {:ok, name, affixes}
       err -> err
@@ -187,14 +193,15 @@ defmodule Temp do
 
   @spec parse_affixes(options, Path.t) :: map
   defp parse_affixes(nil, default_prefix), do: %{prefix: default_prefix}
-  defp parse_affixes(affixes, _) when is_bitstring(affixes), do: %{prefix: affixes, suffix: nil}
+  defp parse_affixes(affixes, _) when is_bitstring(affixes), do: %{prefix: affixes, suffix: nil, extension: nil}
   defp parse_affixes(affixes, default_prefix) when is_map(affixes) do
     affixes
     |> Dict.put(:prefix, affixes[:prefix] || default_prefix)
     |> Dict.put(:suffix, affixes[:suffix] || nil)
+    |> Dict.put(:extension, affixes[:extension] || nil)
   end
   defp parse_affixes(_, default_prefix) do
-    %{prefix: default_prefix, suffix: nil}
+    %{prefix: default_prefix, suffix: nil, extension: nil}
   end
 
   defp get_tracker do
