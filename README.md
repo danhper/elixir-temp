@@ -24,6 +24,8 @@ end
 {:ok, tmp_path} = Temp.path "my-prefix"
 # with prefix and suffix
 {:ok, tmp_path} = Temp.path %{prefix: "my-prefix", suffix: "my-suffix"}
+# with prefix and suffix and file extension
+{:ok, tmp_path} = Temp.path %{prefix: "my-prefix", suffix: "my-suffix", extension: "temp"}
 # in a non-default tmp_dir
 {:ok, tmp_path} = Temp.path %{prefix: "my-prefix", suffix: "my-suffix", basedir: "/my-tmp"}
 # error on fail

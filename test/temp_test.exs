@@ -16,12 +16,18 @@ defmodule TempTest do
 
     path = Temp.path! %{basedir: "bar", prefix: "my-prefix"}
     assert Path.dirname(path) == "bar"
-    assert String.starts_with?(Path.basename(path), "my-prefix")
+    assert String.starts_with?(Path.basename(path), "my-prefix-")
 
     path = Temp.path! %{basedir: "other", prefix: "my-prefix", suffix: "my-suffix"}
     assert Path.dirname(path) == "other"
-    assert String.starts_with?(Path.basename(path), "my-prefix")
-    assert String.ends_with?(Path.basename(path), "my-suffix")
+    assert String.starts_with?(Path.basename(path), "my-prefix-")
+    assert String.ends_with?(Path.basename(path), "-my-suffix")
+
+    path = Temp.path! %{basedir: "baz", prefix: "my-prefix", suffix: "my-suffix",
+      extension: "txt"}
+    assert Path.dirname(path) == "baz"
+    assert String.starts_with?(Path.basename(path), "my-prefix-")
+    assert String.ends_with?(Path.basename(path), "-my-suffix.txt")
   end
 
   test :open do
