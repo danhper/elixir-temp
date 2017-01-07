@@ -92,7 +92,7 @@ defmodule TempTest do
 
     assert Enum.count(Temp.tracked) == 2
 
-    parent = self
+    parent = self()
     spawn_link fn ->
       send parent, {:count, Temp.tracked(tracker) |> Enum.count}
     end

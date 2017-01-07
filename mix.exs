@@ -3,16 +3,16 @@ defmodule Temp.Mixfile do
 
   def project do
     [app: :temp,
-     version: "0.4.1",
+     version: "0.4.2",
      elixir: "~> 1.0",
      name: "temp",
      source_url: "http://github.com/tuvistavie/elixir-temp",
      homepage_url: "http://github.com/tuvistavie/elixir-temp",
-     package: package,
-     description: description,
+     package: package(),
+     description: description(),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps]
+     deps: deps()]
   end
 
   def application do
@@ -21,7 +21,7 @@ defmodule Temp.Mixfile do
 
   defp deps do
     [{:earmark, "~> 1.0", only: :dev},
-     {:ex_doc, "~> 0.13", only: :dev}]
+     {:ex_doc, "~> 0.14", only: :dev}]
   end
 
   defp description do

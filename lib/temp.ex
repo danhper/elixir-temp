@@ -8,16 +8,16 @@ defmodule Temp do
   @pdict_key :"$__temp_tracker__"
 
   @spec track :: Agent.on_start
-  def track do
+  def track() do
     case Process.get(@pdict_key) do
       nil ->
-        start_tracker
+        start_tracker()
       v ->
         {:ok, v}
     end
   end
 
-  defp start_tracker do
+  defp start_tracker() do
     case GenServer.start_link(Temp.Tracker, nil, []) do
       {:ok, pid} ->
         Process.put(@pdict_key, pid)
@@ -31,8 +31,8 @@ defmodule Temp do
   Same as `track/1`, but raises an exception on failure. Otherwise, returns `:ok`
   """
   @spec track! :: pid
-  def track! do
-    case track do
+  def track!() do
+    case track() do
       {:ok, pid} -> pid
       err        -> raise Temp.Error, message: err
     end
@@ -42,7 +42,7 @@ defmodule Temp do
   Return the paths currently tracked.
   """
   @spec tracked :: Set.t
-  def tracked(tracker \\ get_tracker!) do
+  def tracked(tracker \\ get_tracker!()) do
     GenServer.call(tracker, :tracked)
   end
 
@@ -51,7 +51,7 @@ defmodule Temp do
   Cleans up the temporary files tracked.
   """
   @spec cleanup(pid, Keyword.t) :: :ok | {:error, any}
-  def cleanup(tracker \\ get_tracker!, opts \\ []) do
+  def cleanup(tracker \\ get_tracker!(), opts \\ []) do
     GenServer.call(tracker, :cleanup, opts[:timeout] || :infinity)
   end
 
@@ -90,7 +90,7 @@ defmodule Temp do
   def open(options \\ nil, func \\ nil) do
     case generate_name(options, "f") do
       {:ok, path, options} ->
-        options = Dict.put(options, :mode, options[:mode] || [:read, :write])
+        options = Map.put(options, :mode, options[:mode] || [:read, :write])
         ret = if func do
           File.open(path, options[:mode], func)
         else
@@ -98,7 +98,7 @@ defmodule Temp do
         end
         case ret do
           {:ok, res} ->
-            if tracker = get_tracker, do: register_path(tracker, path)
+            if tracker = get_tracker(), do: register_path(tracker, path)
             if func, do: {:ok, path}, else: {:ok, res, path}
           err -> err
         end
@@ -130,7 +130,7 @@ defmodule Temp do
       {:ok, path, _} ->
         case File.mkdir path do
           :ok ->
-            if tracker = get_tracker, do: register_path(tracker, path)
+            if tracker = get_tracker(), do: register_path(tracker, path)
             {:ok, path}
           err -> err
         end
@@ -146,7 +146,7 @@ defmodule Temp do
   def mkdir!(options \\ %{}) do
     case mkdir(options) do
       {:ok, path} ->
-        if tracker = get_tracker, do: register_path(tracker, path)
+        if tracker = get_tracker(), do: register_path(tracker, path)
         path
       {:error, err} -> raise Temp.Error, message: err
     end
@@ -157,7 +157,7 @@ defmodule Temp do
     case prefix(options) do
       {:ok, path} ->
         affixes = parse_affixes(options, default_prefix)
-        parts = [timestamp, "-", :os.getpid, "-", random_string]
+        parts = [timestamp(), "-", :os.getpid(), "-", random_string()]
         parts =
           if affixes[:prefix] do
             [affixes[:prefix], "-"] ++ parts
@@ -190,8 +190,8 @@ defmodule Temp do
   defp parse_affixes(affixes, _) when is_bitstring(affixes), do: %{prefix: affixes, suffix: nil}
   defp parse_affixes(affixes, default_prefix) when is_map(affixes) do
     affixes
-    |> Dict.put(:prefix, affixes[:prefix] || default_prefix)
-    |> Dict.put(:suffix, affixes[:suffix] || nil)
+    |> Map.put(:prefix, affixes[:prefix] || default_prefix)
+    |> Map.put(:suffix, affixes[:suffix] || nil)
   end
   defp parse_affixes(_, default_prefix) do
     %{prefix: default_prefix, suffix: nil}
@@ -201,8 +201,8 @@ defmodule Temp do
     Process.get(@pdict_key)
   end
 
-  defp get_tracker! do
-    case get_tracker do
+  defp get_tracker!() do
+    case get_tracker() do
       nil ->
         raise Temp.Error, message: "temp tracker not started"
       pid ->
