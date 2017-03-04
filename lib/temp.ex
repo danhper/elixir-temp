@@ -59,6 +59,15 @@ defmodule Temp do
   Returns a `{:ok, path}` where `path` is a path that can be used freely in the
   system temporary directory, or `{:error, reason}` if it fails to get the
   system temporary directory.
+
+  ## Options
+
+  The following options can be used to customize the generated path
+
+    * `:prefix` - prepends the given prefix to the path
+
+    * `:suffix` - appends the given suffix to the path,
+      this is useful to generate a file with a particular extension
   """
   @spec path(options) :: {:ok, Path.t} | {:error, String.t}
   def path(options \\ nil) do
@@ -85,6 +94,10 @@ defmodule Temp do
   and `file_path` is the path of the temporary file.
   When no callback is passed, the file descriptor should be closed.
   Returns `{:error, reason}` if a failure occurs.
+
+  ## Options
+
+  See `path/1`.
   """
   @spec open(options, nil | (File.io_device -> any)) :: {:ok, File.io_device, Path.t} | {:error, any}
   def open(options \\ nil, func \\ nil) do
@@ -123,6 +136,10 @@ defmodule Temp do
   Returns `{:ok, dir_path}` where `dir_path` is the path is the path of the
   created temporary directory.
   Returns `{:error, reason}` if a failure occurs.
+
+  ## Options
+
+  See `path/1`.
   """
   @spec mkdir(options) :: {:ok, Path.t} | {:error, any}
   def mkdir(options \\ %{}) do

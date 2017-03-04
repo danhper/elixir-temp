@@ -1,9 +1,11 @@
 defmodule Temp.Mixfile do
   use Mix.Project
 
+  @version "0.4.2"
+
   def project do
     [app: :temp,
-     version: "0.4.2",
+     version: @version,
      elixir: "~> 1.0",
      name: "temp",
      source_url: "http://github.com/tuvistavie/elixir-temp",
@@ -12,7 +14,8 @@ defmodule Temp.Mixfile do
      description: description(),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps()]
+     deps: deps(),
+     docs: [source_ref: "#{@version}", extras: ["README.md"], main: "readme"]]
   end
 
   def application do
