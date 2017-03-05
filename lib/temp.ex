@@ -169,7 +169,11 @@ defmodule Temp do
     end
   end
 
-  @spec generate_name(options, Path.t) :: {:ok, Path.t, map} | {:error, String.t}
+  @spec generate_name(options, Path.t) :: {:ok, Path.t, map | Keyword.t} | {:error, String.t}
+  defp generate_name(options, default_prefix)
+  defp generate_name(options, default_prefix) when is_list(options) do
+    generate_name(Enum.into(options,%{}), default_prefix)
+  end
   defp generate_name(options, default_prefix) do
     case prefix(options) do
       {:ok, path} ->
@@ -181,17 +185,19 @@ defmodule Temp do
           else
             parts
           end
-        parts =
-          if affixes[:suffix] do
-            parts ++ ["-", affixes[:suffix]]
-          else
-            parts
-          end
+        parts = add_suffix(parts, affixes[:suffix])
         name = Path.join(path, Enum.join(parts))
         {:ok, name, affixes}
       err -> err
     end
   end
+
+
+  @spec add_suffix([String.t], nil | String.t) :: [String.t]
+  defp add_suffix(parts, suffix)
+  defp add_suffix(parts, nil), do: parts
+  defp add_suffix(parts, ("." <> _suffix) = suffix), do: parts ++ [suffix]
+  defp add_suffix(parts, suffix), do: parts ++ ["-", suffix]
 
   @spec prefix(nil | map) :: {:ok, Path.t} | {:error, String.t}
   defp prefix(%{basedir: dir}), do: {:ok, dir}
