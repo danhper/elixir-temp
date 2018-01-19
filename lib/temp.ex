@@ -80,11 +80,11 @@ defmodule Temp do
   @doc """
   Same as `path/1`, but raises an exception on failure. Otherwise, returns a temporary path.
   """
-  @spec path!(options) :: Path.t
+  @spec path!(options) :: Path.t | no_return
   def path!(options \\ nil) do
     case path(options) do
       {:ok, path} -> path
-      err -> err
+      err         -> raise Temp.Error, message: err
     end
   end
 
