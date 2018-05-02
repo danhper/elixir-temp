@@ -33,11 +33,14 @@ defmodule Temp.Tracker do
   end
 
   defp cleanup(state) do
-    Enum.partition state, fn path ->
-      case File.rm_rf(path) do
-        {:ok, _} -> true
-        _ -> false
-      end
-    end
+    {removed, failed} =
+      state
+      |> Enum.reduce({[], []}, fn path, {removed, failed} ->
+        case File.rm_rf(path) do
+          {:ok, _} -> {[path | removed], failed}
+          _ -> {removed, [path | failed]}
+        end
+      end)
+    {:lists.reverse(removed), :lists.reverse(failed)}
   end
 end
