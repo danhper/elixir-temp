@@ -30,11 +30,11 @@ defmodule Temp do
   @doc """
   Same as `track/1`, but raises an exception on failure. Otherwise, returns `:ok`
   """
-  @spec track! :: pid
+  @spec track! :: pid | no_return
   def track!() do
     case track() do
       {:ok, pid} -> pid
-      err        -> raise Temp.Error, message: err
+      {:error, err} -> raise Temp.Error, message: err
     end
   end
 
@@ -84,7 +84,7 @@ defmodule Temp do
   def path!(options \\ nil) do
     case path(options) do
       {:ok, path} -> path
-      err         -> raise Temp.Error, message: err
+      {:error, err} -> raise Temp.Error, message: err
     end
   end
 
@@ -99,7 +99,7 @@ defmodule Temp do
 
   See `path/1`.
   """
-  @spec open(options, nil | (File.io_device -> any)) :: {:ok, File.io_device, Path.t} | {:error, any}
+  @spec open(options, nil | (File.io_device -> any)) :: {:ok, Path.t} | {:ok, File.io_device, Path.t} | {:error, any}
   def open(options \\ nil, func \\ nil) do
     case generate_name(options, "f") do
       {:ok, path, options} ->
@@ -122,7 +122,7 @@ defmodule Temp do
   @doc """
   Same as `open/1`, but raises an exception on failure.
   """
-  @spec open!(options, pid | nil) :: {File.io_device, Path.t}
+  @spec open!(options, pid | nil) :: Path.t | {File.io_device, Path.t} | no_return
   def open!(options \\ nil, func \\ nil) do
     case open(options, func) do
       {:ok, res, path} -> {res, path}
@@ -159,7 +159,7 @@ defmodule Temp do
   Same as `mkdir/1`, but raises an exception on failure. Otherwise, returns
   a temporary directory path.
   """
-  @spec mkdir!(options) :: Path.t
+  @spec mkdir!(options) :: Path.t | no_return
   def mkdir!(options \\ %{}) do
     case mkdir(options) do
       {:ok, path} ->
@@ -192,14 +192,11 @@ defmodule Temp do
     end
   end
 
-
-  @spec add_suffix([String.t], nil | String.t) :: [String.t]
   defp add_suffix(parts, suffix)
   defp add_suffix(parts, nil), do: parts
   defp add_suffix(parts, ("." <> _suffix) = suffix), do: parts ++ [suffix]
   defp add_suffix(parts, suffix), do: parts ++ ["-", suffix]
 
-  @spec prefix(nil | map) :: {:ok, Path.t} | {:error, String.t}
   defp prefix(%{basedir: dir}), do: {:ok, dir}
   defp prefix(_) do
     case System.tmp_dir do
@@ -208,7 +205,6 @@ defmodule Temp do
     end
   end
 
-  @spec parse_affixes(options, Path.t) :: map
   defp parse_affixes(nil, default_prefix), do: %{prefix: default_prefix}
   defp parse_affixes(affixes, _) when is_bitstring(affixes), do: %{prefix: affixes, suffix: nil}
   defp parse_affixes(affixes, default_prefix) when is_map(affixes) do
