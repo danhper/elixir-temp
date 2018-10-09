@@ -1,7 +1,7 @@
 defmodule Temp.Mixfile do
   use Mix.Project
 
-  @version "0.4.5"
+  @version "0.4.6"
 
   def project do
     [app: :temp,
@@ -24,7 +24,7 @@ defmodule Temp.Mixfile do
 
   defp deps do
     [{:earmark, "~> 1.0", only: :dev},
-     {:ex_doc, "~> 0.14", only: :dev}]
+     {:ex_doc, "~> 0.19", only: :dev}]
   end
 
   defp description do
