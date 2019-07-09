@@ -68,6 +68,9 @@ defmodule Temp do
 
     * `:suffix` - appends the given suffix to the path,
       this is useful to generate a file with a particular extension
+    
+    * `:basedir` - places the generated file in the designated base directory
+      instead of the system temporary directory
   """
   @spec path(options) :: {:ok, Path.t} | {:error, String.t}
   def path(options \\ nil) do
