@@ -8,8 +8,8 @@ defmodule Temp.Mixfile do
      version: @version,
      elixir: "~> 1.0",
      name: "temp",
-     source_url: "http://github.com/tuvistavie/elixir-temp",
-     homepage_url: "http://github.com/tuvistavie/elixir-temp",
+     source_url: "http://github.com/danhper/elixir-temp",
+     homepage_url: "http://github.com/danhper/elixir-temp",
      package: package(),
      description: description(),
      build_embedded: Mix.env == :prod,
@@ -36,7 +36,7 @@ defmodule Temp.Mixfile do
     files: ["lib", "mix.exs", "README.md", "LICENSE"],
     maintainers: ["Daniel Perez"],
     licenses: ["MIT"],
-    links: %{"GitHub" => "https://github.com/tuvistavie/elixir-temp"}
+    links: %{"GitHub" => "https://github.com/danhper/elixir-temp"}
   ]
  end
 end

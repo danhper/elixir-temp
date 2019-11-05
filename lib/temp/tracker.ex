@@ -5,36 +5,38 @@ defmodule Temp.Tracker do
     defp set(), do: MapSet.new
     defdelegate put(set, value), to: MapSet
   else
-    defp set(), do: HashSet.new
+    defp set(), do: HashMap.new
     defdelegate put(set, value), to: HashSet
   end
 
   def init(_args) do
-    Process.flag(:trap_exit, true)
-    {:ok, set()}
+    {:ok, %{}}
   end
 
-  def handle_call({:add, item}, _from, state) do
-    {:reply, item, put(state, item)}
+  def track() do
+    GenServer.call(tracker, :track)
   end
 
-  def handle_call(:tracked, _from, state) do
-    {:reply, state, state}
+  def handle_call(:track, {pid, _tag}, state) do
   end
 
-  def handle_call(:cleanup, _from, state) do
-    {removed, failed} = cleanup(state)
-    {:reply, removed, Enum.into(failed, set())}
+  def handle_call({:add, item}, {pid, _tag}, state) do
+    files = Map.get(state, pid, set())
+    {:reply, item, Map.put(pid, put(files, item))}
   end
 
-  def terminate(_reason, state) do
-    cleanup(state)
-    :ok
+  def handle_call(:tracked, {pid, _tag}, state) do
+    {:reply, Map.get(state, pid, set()), state}
   end
 
-  defp cleanup(state) do
+  def handle_call(:cleanup, {pid, _tag}, state) do
+    {removed, failed} = cleanup(Map.get(state, pid, set()))
+    {:reply, removed, Map.put(state, pid, Enum.into(failed, set()))}
+  end
+
+  defp cleanup(files) do
     {removed, failed} =
-      state
+      files
       |> Enum.reduce({[], []}, fn path, {removed, failed} ->
         case File.rm_rf(path) do
           {:ok, _} -> {[path | removed], failed}
