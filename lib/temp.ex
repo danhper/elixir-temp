@@ -50,7 +50,7 @@ defmodule Temp do
   @doc """
   Cleans up the temporary files tracked.
   """
-  @spec cleanup(pid, Keyword.t) :: :ok | {:error, any}
+  @spec cleanup(pid, Keyword.t) :: [Path.t]
   def cleanup(tracker \\ get_tracker!(), opts \\ []) do
     GenServer.call(tracker, :cleanup, opts[:timeout] || :infinity)
   end
