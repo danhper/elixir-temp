@@ -123,6 +123,17 @@ defmodule Temp do
   end
 
   @doc """
+  Function allows add file to tracker, which will be removed on Temp.cleanup
+  """
+  @spec track_file(any) :: {:error, :tracker_not_found} | {:ok, Path.t}
+  def track_file(path, tracker \\ get_tracker()) do
+    case is_nil(tracker) do
+      true -> {:error, :tracker_not_found}
+      false -> {:ok, register_path(tracker, path)}
+    end
+  end
+
+  @doc """
   Same as `open/1`, but raises an exception on failure.
   """
   @spec open!(options, pid | nil) :: Path.t | {File.io_device, Path.t} | no_return

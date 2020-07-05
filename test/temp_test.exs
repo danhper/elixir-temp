@@ -120,4 +120,19 @@ defmodule TempTest do
     assert_receive {:cleaned, 1}
     refute File.exists?(dir)
   end
+
+  test :track_file do
+    assert {:ok, tracker} = Temp.track
+
+    path_of_tmp_file = "test/tmp_file_created_by_programmer"
+    File.write!(path_of_tmp_file, "Make Elixir Gr8 Again")
+
+    assert File.exists?(path_of_tmp_file)
+
+    Temp.track_file(path_of_tmp_file, tracker)
+
+    Temp.cleanup(tracker)
+
+    refute File.exists?(path_of_tmp_file)
+  end
 end
