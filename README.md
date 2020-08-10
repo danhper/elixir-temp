@@ -73,11 +73,11 @@ File.rm file_path
 ### Tracking temporary files
 
 By default, you have to cleanup the files by yourself, however, you can tell
-`Temp` to track the temporary files.
+`Temp` to track the temporary files automatically.
 You just need to call `Temp.track` (or the bang version `Temp.track!`) and you are done.
 Temporary files will be cleaned up automatically when the process exits.
 You can also call `Temp.cleanup` if you want to clean them before the process exits.
-Here is an example of how to use it.
+Here is an example of how to use it:
 
 ```elixir
 Temp.track!

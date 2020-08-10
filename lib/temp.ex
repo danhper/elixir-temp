@@ -60,6 +60,9 @@ defmodule Temp do
   system temporary directory, or `{:error, reason}` if it fails to get the
   system temporary directory.
 
+  This path is not tracked, so any file created will need manually removing, or
+  use `track_file/1` to have it removed automatically.
+
   ## Options
 
   The following options can be used to customize the generated path
@@ -68,7 +71,7 @@ defmodule Temp do
 
     * `:suffix` - appends the given suffix to the path,
       this is useful to generate a file with a particular extension
-    
+
     * `:basedir` - places the generated file in the designated base directory
       instead of the system temporary directory
   """
@@ -98,6 +101,8 @@ defmodule Temp do
   When no callback is passed, the file descriptor should be closed.
   Returns `{:error, reason}` if a failure occurs.
 
+  The resulting file is automatically tracked if tracking is enabled.
+
   ## Options
 
   See `path/1`.
@@ -123,7 +128,7 @@ defmodule Temp do
   end
 
   @doc """
-  Function allows add file to tracker, which will be removed on Temp.cleanup
+  Add a file to the tracker, so that it will be removed automatically or on Temp.cleanup.
   """
   @spec track_file(any) :: {:error, :tracker_not_found} | {:ok, Path.t}
   def track_file(path, tracker \\ get_tracker()) do
@@ -150,6 +155,8 @@ defmodule Temp do
   Returns `{:ok, dir_path}` where `dir_path` is the path is the path of the
   created temporary directory.
   Returns `{:error, reason}` if a failure occurs.
+
+  The directory is automatically tracked if tracking is enabled.
 
   ## Options
 
