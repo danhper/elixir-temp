@@ -1,4 +1,11 @@
-# elixir-temp [![Build Status](https://travis-ci.org/danhper/elixir-temp.svg?branch=master)](https://travis-ci.org/danhper/elixir-temp)
+# elixir-temp
+
+[![Build Status](https://travis-ci.org/danhper/elixir-temp.svg?branch=master)](https://travis-ci.org/danhper/elixir-temp)
+[![Module Version](https://img.shields.io/hexpm/v/temp.svg)](https://hex.pm/packages/temp)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/temp/)
+[![Total Download](https://img.shields.io/hexpm/dt/temp.svg)](https://hex.pm/packages/temp)
+[![License](https://img.shields.io/hexpm/l/temp.svg)](https://github.com/danhper/elixir-temp/blob/master/LICENSE)
+[![Last Updated](https://img.shields.io/github/last-commit/danhper/elixir-temp.svg)](https://github.com/danhper/elixir-temp/commits/master)
 
 An Elixir module to easily create and use temporary files and directories.
 The module is inspired by [node-temp](https://github.com/bruce/node-temp).
@@ -96,3 +103,8 @@ Temp.cleanup
 dir_path = Temp.mkdir
 # this will be cleaned up on exit
 ```
+
+## License
+
+This source code is licensed under the MIT License. Copyright (c) 2015, Daniel
+Perez. All rights reserved.
