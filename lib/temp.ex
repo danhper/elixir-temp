@@ -28,7 +28,7 @@ defmodule Temp do
   end
 
   @doc """
-  Same as `track/1`, but raises an exception on failure. Otherwise, returns `:ok`
+  Same as `track/0`, but raises an exception on failure. Otherwise, returns `:ok`
   """
   @spec track! :: pid | no_return
   def track!() do
