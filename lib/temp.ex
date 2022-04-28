@@ -141,7 +141,7 @@ defmodule Temp do
   @doc """
   Same as `open/1`, but raises an exception on failure.
   """
-  @spec open!(options, pid | nil) :: Path.t | {File.io_device, Path.t} | no_return
+  @spec open!(options, nil | (File.io_device -> any)) :: Path.t | {File.io_device, Path.t} | no_return
   def open!(options \\ nil, func \\ nil) do
     case open(options, func) do
       {:ok, res, path} -> {res, path}
