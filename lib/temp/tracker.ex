@@ -28,9 +28,9 @@ defmodule Temp.Tracker do
     defdelegate intersection(set1, set2), to: HashSet
   end
 
-  @spec start_link(pid()) :: GenServer.on_start()
-  def start_link(tracked_pid) do
-    GenServer.start_link(__MODULE__, tracked_pid)
+  @spec start_link(nil) :: GenServer.on_start()
+  def start_link(_) do
+    GenServer.start_link(__MODULE__, nil)
   end
 
   @spec init(any()) :: {:ok, state()}
