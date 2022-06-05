@@ -170,6 +170,7 @@ defmodule TempTest do
 
     :timer.sleep(50)
     refute Temp.tracked() == MapSet.new()
+    Temp.cleanup()
   end
 
   test "automatically cleans up" do
