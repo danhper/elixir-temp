@@ -145,6 +145,7 @@ defmodule TempTest do
     Temp.mkdir!()
 
     heir_pid = Temp.track!()
+    assert Temp.tracked() == MapSet.new()
 
     path_of_tmp_file =
       Task.async(fn ->
@@ -168,7 +169,7 @@ defmodule TempTest do
     end)
 
     :timer.sleep(50)
-    assert Temp.tracked() != MapSet.new()
+    refute Temp.tracked() == MapSet.new()
   end
 
   test "automatically cleans up" do
