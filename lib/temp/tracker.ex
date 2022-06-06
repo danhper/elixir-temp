@@ -3,16 +3,16 @@ defmodule Temp.Tracker do
   @type state :: MapSet.t() | HashSet.t()
 
   if :application.get_key(:elixir, :vsn) |> elem(1) |> to_string() |> Version.match?("~> 1.1") do
-    defp set(), do: MapSet.new()
-    defp set(list), do: MapSet.new(list)
+    def set(), do: MapSet.new()
+    def set(list), do: MapSet.new(list)
     defdelegate union(set1, set2), to: MapSet
     defdelegate put(set, value), to: MapSet
     defdelegate difference(set1, set2), to: MapSet
     defdelegate intersection(set1, set2), to: MapSet
   else
-    defp set(), do: HashSet.new()
+    def set(), do: HashSet.new()
 
-    defp set(list) do
+    def set(list) do
       set_helper(list, set())
     end
 

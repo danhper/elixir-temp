@@ -156,7 +156,7 @@ defmodule TempTest do
       end)
       |> Task.await()
 
-    assert Temp.tracked() == MapSet.new([path_of_tmp_file])
+    assert Temp.tracked() == Temp.Tracker.set([path_of_tmp_file])
     assert File.exists?(path_of_tmp_file)
 
     Temp.cleanup()
@@ -169,7 +169,7 @@ defmodule TempTest do
     end)
 
     :timer.sleep(50)
-    refute Temp.tracked() == MapSet.new()
+    refute Temp.tracked() == Temp.Tracker.set()
     Temp.cleanup()
   end
 
