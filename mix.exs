@@ -8,7 +8,7 @@ defmodule Temp.Mixfile do
     [
       app: :temp,
       version: @version,
-      elixir: "~> 1.0",
+      elixir: "~> 1.9",
       name: "temp",
       source_url: @source_url,
       homepage_url: @source_url,
