@@ -22,11 +22,14 @@ defmodule Temp.Mixfile do
   end
 
   def application do
-    [applications: [:logger]]
+    [extra_applications: [:logger]]
   end
 
-  defp deps do
-    [{:ex_doc, ">= 0.0.0", only: :dev}]
+  defp deps() do
+    [
+      {:earmark, "~> 1.0", only: :dev},
+      {:ex_doc, "~> 0.19", only: :dev}
+    ]
   end
 
   defp description do
