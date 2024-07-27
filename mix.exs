@@ -2,7 +2,7 @@ defmodule Temp.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/tuvistavie/elixir-temp"
-  @version "0.4.7"
+  @version "0.4.8"
 
   def project do
     [
