@@ -2,13 +2,13 @@ defmodule Temp.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/tuvistavie/elixir-temp"
-  @version "0.4.7"
+  @version "0.4.8"
 
   def project do
     [
       app: :temp,
       version: @version,
-      elixir: "~> 1.0",
+      elixir: "~> 1.9",
       name: "temp",
       source_url: @source_url,
       homepage_url: @source_url,
@@ -22,11 +22,14 @@ defmodule Temp.Mixfile do
   end
 
   def application do
-    [applications: [:logger]]
+    [extra_applications: [:logger]]
   end
 
-  defp deps do
-    [{:ex_doc, ">= 0.0.0", only: :dev}]
+  defp deps() do
+    [
+      {:earmark, "~> 1.0", only: :dev},
+      {:ex_doc, "~> 0.19", only: :dev}
+    ]
   end
 
   defp description do

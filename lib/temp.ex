@@ -263,7 +263,7 @@ defmodule Temp do
     Integer.to_string(rand_uniform(0x100000000), 36) |> String.downcase
   end
 
-  if :erlang.system_info(:otp_release) >= '18' do
+  if :erlang.system_info(:otp_release) >= ~c"18" do
     defp rand_uniform(num) do
       :rand.uniform(num)
     end

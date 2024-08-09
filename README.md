@@ -1,6 +1,6 @@
 # elixir-temp
 
-[![Build Status](https://travis-ci.org/danhper/elixir-temp.svg?branch=master)](https://travis-ci.org/danhper/elixir-temp)
+[![Elixir CI](https://github.com/danhper/elixir-temp/actions/workflows/ci.yml/badge.svg)](https://github.com/danhper/elixir-temp/actions/workflows/ci.yml)
 [![Module Version](https://img.shields.io/hexpm/v/temp.svg)](https://hex.pm/packages/temp)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/temp/)
 [![Total Download](https://img.shields.io/hexpm/dt/temp.svg)](https://hex.pm/packages/temp)
